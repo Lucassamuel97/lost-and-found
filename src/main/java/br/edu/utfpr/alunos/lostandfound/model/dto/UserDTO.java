@@ -31,10 +31,5 @@ public class UserDTO {
 	public UserDTO(User user) {
 		this.id = user.getId();
 		this.login = user.getLogin();
-		this.pwd = user.getPwd();
-		this.email = user.getEmail();
-		this.telefone = user.getTelefone();
-		this.created = user.getCreated().toString();
-		this.updated = user.getUpdated().toString();
 	}
 }
