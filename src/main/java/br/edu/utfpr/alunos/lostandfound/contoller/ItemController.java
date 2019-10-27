@@ -167,23 +167,24 @@ public class ItemController {
     }
     
     @PostMapping(value = "/{id}/devolucao")
-    public ResponseEntity<?> devolution(@PathVariable Long id, @Valid @RequestBody ItemDTO dto, BindingResult result) {
+    public ResponseEntity<?> devolution(@PathVariable Long id,@RequestParam("id") Long idUser) {
 
         Response<ItemDTO> response = new Response<>();
-        if (result.hasErrors()) {
-            response.setErrors(result);
-            return ResponseEntity.badRequest().body(response);
-        }
-
+        
+        //Retorna item
         Optional<Item> o = itemService.findById(id);
         if (!o.isPresent()) {
             response.addError("Item não encontrado");
             return ResponseEntity.badRequest().body(response);
         }
+        //Retorna usario
+        if (!o.isPresent()) {
+            response.addError("Item não encontrado");
+            return ResponseEntity.badRequest().body(response);
+        }
         
-        Item item = o.get();
-       
-        Item itemresult = mapper.toEntity(dto);
+        Item itemresult = o.get();
+        itemresult.setStatus('D');
         
         if(itemresult.getUserfound() == null){
         	response.addError("Usuario 2 não selecionado");
@@ -191,13 +192,13 @@ public class ItemController {
 		}
         
         try {
-			item = itemService.save(itemresult);
+        	itemresult = itemService.save(itemresult);
 		}catch(Exception e) {
 			response.addError("Houve um erro ao efetuar a devolucao");
 			return ResponseEntity.badRequest().body(response);
 		}
         
-        dto = mapper.toDto(item);
+        ItemDTO dto = mapper.toDto(itemresult);
         response.setData(dto);
         return ResponseEntity.ok(response);
     }
