@@ -1,40 +1,29 @@
 package br.edu.utfpr.alunos.lostandfound.contoller;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import br.edu.utfpr.alunos.lostandfound.model.dto.UserDTO;
 import br.edu.utfpr.alunos.lostandfound.model.entity.User;
 import br.edu.utfpr.alunos.lostandfound.model.mapper.UserMapper;
 import br.edu.utfpr.alunos.lostandfound.model.service.UserService;
 import br.edu.utfpr.alunos.lostandfound.util.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(origins = "*")
+//@PreAuthorize("hasAnyRole('USER','ADMIN')")
 public class UserController {
 	
 	@Autowired
@@ -48,7 +37,7 @@ public class UserController {
 	
     @GetMapping
     public ResponseEntity<Response<List<UserDTO>>> findAll(
-            @PageableDefault(page=0, size=5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
+            @PageableDefault(page=0, size=5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
 
         Response<List<UserDTO>> response = new Response<>();
 
@@ -99,7 +88,10 @@ public class UserController {
                 return ResponseEntity.badRequest().body(response);
             }
         }
-        User user = mapper.toEntity(dto);
+        // tava dando erro
+        //User user = mapper.toEntity(dto);
+
+        User user = new User(dto);
         try {
             user = userService.save(user);
         } catch (Exception e) {
@@ -107,7 +99,7 @@ public class UserController {
             response.addError("Houve um erro ao persistir os seus dados.");
             return ResponseEntity.badRequest().body(response);
         }
-        dto = mapper.toDto(user);
+        dto = new UserDTO(user);
         response.setData(dto);
 
         return ResponseEntity.ok(response);
@@ -133,8 +125,8 @@ public class UserController {
         User user = o.get();
 
         // impede atualizar para login ja cadastrado
-        if (!user.getLogin().equals(dto.getLogin())) {
-            if (userService.findByLogin(dto.getLogin()) != null) {
+        if (!user.getEmail().equals(dto.getEmail())) {
+            if (userService.findByEmail(dto.getEmail()) != null) {
                 response.addError("Não é possível atualizar para esté Login, ele já está sendo usado.");
                 return ResponseEntity.badRequest().body(response);
             }
@@ -193,7 +185,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         }
         
-        response.setData("Usuario "+o.get().getLogin()+" deletado com sucesso");
+        response.setData("Usuario "+o.get().getEmail()+" deletado com sucesso");
         return ResponseEntity.ok(response);
     }
 }
