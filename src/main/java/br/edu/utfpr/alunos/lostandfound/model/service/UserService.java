@@ -1,14 +1,14 @@
 package br.edu.utfpr.alunos.lostandfound.model.service;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import br.edu.utfpr.alunos.lostandfound.model.entity.User;
 import br.edu.utfpr.alunos.lostandfound.model.repository.UserRepository;
+import br.edu.utfpr.alunos.lostandfound.util.PasswordUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -17,6 +17,7 @@ public class UserService {
 	private UserRepository userRepository;
 
 	public User save(User entity) {
+		entity.setPassword(PasswordUtil.generateBCrypt(entity.getPassword()));
 		return userRepository.save(entity);
 	}
 	public Page<User> findAll(Pageable pageable) {
@@ -31,10 +32,11 @@ public class UserService {
 		return userRepository.findById(id);
 	}
 
-	public User findByLogin(String login) {
-		return userRepository.findByLogin(login);
-	}
 	public void deleteById(Long id) {
 		userRepository.deleteById(id);
+	}
+
+	public Optional<User> findByEmail(String email){
+		return Optional.ofNullable(this.userRepository.findByEmail(email));
 	}
 }
