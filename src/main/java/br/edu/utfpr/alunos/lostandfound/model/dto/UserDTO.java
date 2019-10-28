@@ -25,7 +25,7 @@ public class UserDTO {
 
 	private String created;
 	private String updated;
-	private ProfileEnum profile;
+	private String profile;
 
 	public UserDTO(User user) {
 		this.id = user.getId();
@@ -34,5 +34,6 @@ public class UserDTO {
 		this.telefone = user.getTelefone();
 		this.created = user.getCreated().toString();
 		this.updated = user.getUpdated().toString();
+		this.profile = user.getProfile().toString();
 	}
 }

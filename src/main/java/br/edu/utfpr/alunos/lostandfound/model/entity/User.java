@@ -41,7 +41,9 @@ public class User{
 		this.password = userDTO.getPassword();
 		this.telefone = userDTO.getTelefone();
 		this.id = userDTO.getId();
-		this.profile = userDTO.getProfile();
+		if (userDTO.getProfile().equals("ADMIN"))
+			this.profile = ProfileEnum.ROLE_ADMIN;
+		else this.profile = ProfileEnum.ROLE_USER;
 	}
 	
 	public User(String login,String pwd, String telefone) {
