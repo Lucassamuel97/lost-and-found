@@ -28,6 +28,9 @@ public class User{
 	private String password;
 	
 	@Column
+	private String username;
+	
+	@Column
 	private String telefone;
 
 	@Enumerated(EnumType.STRING)
@@ -40,21 +43,24 @@ public class User{
 		this.email = userDTO.getEmail();
 		this.password = userDTO.getPassword();
 		this.telefone = userDTO.getTelefone();
+		this.username = userDTO.getUsername();
 		this.id = userDTO.getId();
 		if (userDTO.getProfile().equals("ADMIN"))
 			this.profile = ProfileEnum.ROLE_ADMIN;
 		else this.profile = ProfileEnum.ROLE_USER;
 	}
 	
-	public User(String login,String pwd, String telefone) {
+	public User(String login,String pwd, String telefone, String username) {
 		this.email = login;
 		this.password = pwd;
 		this.telefone = telefone;
+		this.username = username;
 	}
 	
     public void update(UserDTO dto) {
     	this.email = dto.getEmail();
 		this.telefone = dto.getTelefone();
+		this.username = dto.getUsername();
     }
 
     @PreUpdate

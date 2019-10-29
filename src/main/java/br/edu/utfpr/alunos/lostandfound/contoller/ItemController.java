@@ -2,8 +2,10 @@ package br.edu.utfpr.alunos.lostandfound.contoller;
 
 import br.edu.utfpr.alunos.lostandfound.model.dto.ItemDTO;
 import br.edu.utfpr.alunos.lostandfound.model.entity.Item;
+import br.edu.utfpr.alunos.lostandfound.model.entity.User;
 import br.edu.utfpr.alunos.lostandfound.model.mapper.ItemMapper;
 import br.edu.utfpr.alunos.lostandfound.model.service.ItemService;
+import br.edu.utfpr.alunos.lostandfound.model.service.UserService;
 import br.edu.utfpr.alunos.lostandfound.util.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +29,12 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class ItemController {
+	
 	@Autowired
 	ItemService itemService;
+	
+	@Autowired
+	UserService userService;
 
 	@Autowired
 	ItemMapper mapper;
@@ -37,13 +45,7 @@ public class ItemController {
 	@GetMapping
 	public ResponseEntity<Response<List<ItemDTO>>> findAll(
 			@PageableDefault(page=0, size=5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
-
-
-		// Pegar o usuario logado
-		// SecurityContext securityContext = SecurityContextHolder.getContext();
-		// Optional<User> o = userService.findByEmail(securityContext.getAuthentication().getName());
-
-
+		
 		Response<List<ItemDTO>> response = new Response<>();
 
 		Page<Item> itens = this.itemService.findAll(pageable);
@@ -75,9 +77,14 @@ public class ItemController {
 			}
 		}
 		
-		dto.setStatus('A');
+		// Pegar o usuario logado
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> o = userService.findByEmail(securityContext.getAuthentication().getName());
 		
 		Item item = mapper.toEntity(dto);
+		
+		item.setStatus('A');
+		item.setUsersrecord(o.get());
 		
 		try {
 			item = itemService.save(item);
@@ -127,6 +134,15 @@ public class ItemController {
             return ResponseEntity.badRequest().body(response);
         }
         
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		//Verifica se é o usuario que cadastrou que está atualizando o item
+		if (dto.getUsersrecord().getId() !=  user.get().getId()){
+            response.addError("O usuario não tem permissão para atualizar o item");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
         Item item = mapper.toEntity(dto);
         try {
 			item = itemService.save(item);
@@ -151,6 +167,15 @@ public class ItemController {
             return ResponseEntity.badRequest().body(response);
         }
         
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		//Verifica se é o usuario que cadastrou que está deletando o item
+		if (o.get().getUsersrecord().getId() !=  user.get().getId()){
+            response.addError("O usuario não tem permissão para deletar o item");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
         try {
         	 this.itemService.deleteById(id);
         } catch (Exception e) {
@@ -163,7 +188,7 @@ public class ItemController {
     }
     
     @PostMapping(value = "/{id}/devolucao")
-    public ResponseEntity<?> devolution(@PathVariable Long id,@RequestParam("id") Long idUser) {
+    public ResponseEntity<?> devolution(@PathVariable Long id) {
 
         Response<ItemDTO> response = new Response<>();
         
@@ -173,14 +198,13 @@ public class ItemController {
             response.addError("Item não encontrado");
             return ResponseEntity.badRequest().body(response);
         }
-        //Retorna usario
-        if (!o.isPresent()) {
-            response.addError("Item não encontrado");
-            return ResponseEntity.badRequest().body(response);
-        }
+        
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
         
         Item itemresult = o.get();
         itemresult.setStatus('D');
+        itemresult.setUserfound(user.get());
         
         if(itemresult.getUserfound() == null){
         	response.addError("Usuario 2 não selecionado");

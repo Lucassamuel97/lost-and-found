@@ -44,7 +44,7 @@ public class UserController {
         Page<User> users = this.userService.findAll(pageable);
         Page<UserDTO> userDTOS = users.map(u -> new UserDTO(u));
         if(userDTOS.getContent().isEmpty()) {
-            response.addError("Nenhum item nesta página.");
+            response.addError("Nenhum usuario nesta página.");
             return ResponseEntity.badRequest().body(response);
         }
         response.setData(userDTOS.getContent());
