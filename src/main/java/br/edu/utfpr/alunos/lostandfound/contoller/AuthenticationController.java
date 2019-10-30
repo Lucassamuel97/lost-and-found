@@ -49,18 +49,12 @@ public class AuthenticationController {
 			result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
 			return ResponseEntity.badRequest().body(response);
 		}
-		System.out.println("Parte 1");
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(authenticationDTO.getEmail(), authenticationDTO.getPassword()));
-		System.out.println("Parte 2");
 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		System.out.println("Parte 3");
 		UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationDTO.getEmail());
-		System.out.println("Parte 4");
 		String token = jwtTokenUtil.generateToken(userDetails);
-		System.out.println("Parte 5");
 		response.setData(new TokenDTO(token));
-		System.out.println("Parte 6");
 		return ResponseEntity.ok(response);
 	}
 	
