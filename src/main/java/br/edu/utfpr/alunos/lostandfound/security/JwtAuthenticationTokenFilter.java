@@ -40,7 +40,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 		req.putHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Token");
 		req.putHeader("Access-Control-Max-Age", "1728000");
 		
-		String token = request.getHeader(AUTH_HEADER);
+		String token = req.getHeader(AUTH_HEADER);
 		if(token != null && token.startsWith(BEARER_PREFIX)) {
 			token = token.substring(7);
 		}
@@ -53,7 +53,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 			if(jwtTokenUtil.isValid(token)) {
 				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, 
 						null, userDetails.getAuthorities());
-				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
 				SecurityContextHolder.getContext().setAuthentication(authentication); 
 			}
 		}
