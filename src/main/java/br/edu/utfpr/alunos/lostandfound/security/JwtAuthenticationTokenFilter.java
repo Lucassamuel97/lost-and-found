@@ -33,6 +33,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 		
+		CustomHttpServletRequest req = new CustomHttpServletRequest(request);
+		
+		req.putHeader("Access-Control-Allow-Origin", "*");
+		req.putHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+		req.putHeader("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, Token");
+		req.putHeader("Access-Control-Max-Age", "1728000");
+		
 		String token = request.getHeader(AUTH_HEADER);
 		if(token != null && token.startsWith(BEARER_PREFIX)) {
 			token = token.substring(7);
@@ -51,7 +58,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 			}
 		}
 		
-		filterChain.doFilter(request, response);
+		filterChain.doFilter(req, response);
 
 	}
 
