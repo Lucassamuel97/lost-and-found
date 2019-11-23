@@ -12,6 +12,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
+import br.edu.utfpr.alunos.lostandfound.model.dto.ItemDTO;
 import lombok.Data;
 
 @Entity
@@ -59,4 +60,13 @@ public class Item {
 		this.created = now;
 		this.updated = now;
 	}
+
+	public void update(ItemDTO dto) {
+		this.descricao = dto.getDescricao();
+		this.local = dto.getLocal();
+		this.horario = dto.getHorario();
+		this.data = dto.getData();
+    }
+	
+	
 }

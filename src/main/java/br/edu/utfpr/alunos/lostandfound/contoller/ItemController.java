@@ -29,10 +29,10 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class ItemController {
-	
+
 	@Autowired
 	ItemService itemService;
-	
+
 	@Autowired
 	UserService userService;
 
@@ -44,13 +44,13 @@ public class ItemController {
 
 	@GetMapping
 	public ResponseEntity<Response<List<ItemDTO>>> findAll(
-			@PageableDefault(page=0, size=5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
-		
+			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
+
 		Response<List<ItemDTO>> response = new Response<>();
 
 		Page<Item> itens = this.itemService.findAll(pageable);
 		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
-		if(itemDTOS.getContent().isEmpty()) {
+		if (itemDTOS.getContent().isEmpty()) {
 			response.addError("Nenhum item nesta página.");
 			return ResponseEntity.badRequest().body(response);
 		}
@@ -76,16 +76,16 @@ public class ItemController {
 				return ResponseEntity.badRequest().body(response);
 			}
 		}
-		
+
 		// Pegar o usuario logado
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Optional<User> o = userService.findByEmail(securityContext.getAuthentication().getName());
-		
+
 		Item item = mapper.toEntity(dto);
-		
+
 		item.setStatus('A');
 		item.setUsersrecord(o.get());
-		
+
 		try {
 			item = itemService.save(item);
 		} catch (Exception e) {
@@ -101,125 +101,126 @@ public class ItemController {
 	// retorna Item
 	@GetMapping(value = "/{id}")
 	public ResponseEntity<Response<ItemDTO>> findByItem(@PathVariable Long id) {
-		
+
 		Response<ItemDTO> response = new Response<>();
 
 		Optional<Item> opItem = itemService.findById(id);
-		
+
 		if (!opItem.isPresent()) {
 			response.addError("Item não encontrado.");
-            return ResponseEntity.badRequest().body(response);
+			return ResponseEntity.badRequest().body(response);
 		}
-		
+
 		Item item = opItem.get();
 		ItemDTO dto = mapper.toDto(item);
 		response.setData(dto);
-		
+
 		return ResponseEntity.ok(response);
 	}
-	
-    //Atualiza item
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody ItemDTO dto, BindingResult result) {
 
-        Response<ItemDTO> response = new Response<>();
-        if (result.hasErrors()) {
-            response.setErrors(result);
-            return ResponseEntity.badRequest().body(response);
-        }
+	// Atualiza item
+	@PutMapping(value = "/{id}")
+	public ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody ItemDTO dto, BindingResult result) {
 
-        Optional<Item> o = itemService.findById(id);
-        if (!o.isPresent()) {
-            response.addError("Item não encontrado");
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        SecurityContext securityContext = SecurityContextHolder.getContext();
+		Response<ItemDTO> response = new Response<>();
+		if (result.hasErrors()) {
+			response.setErrors(result);
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		Optional<Item> o = itemService.findById(id);
+		if (!o.isPresent()) {
+			response.addError("Item não encontrado");
+			return ResponseEntity.badRequest().body(response);
+		}
+		Item item = o.get();
+		item.update(dto);
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
-		
-		//Verifica se é o usuario que cadastrou que está atualizando o item
-		if (dto.getUsersrecord().getId() !=  user.get().getId()){
-            response.addError("O usuario não tem permissão para atualizar o item");
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        Item item = mapper.toEntity(dto);
-        try {
+
+		// Verifica se é o usuario que cadastrou que está atualizando o item
+		if (item.getUsersrecord().getId() != user.get().getId()) {
+			response.addError("O usuario não tem permissão para atualizar o item");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		try {
 			item = itemService.save(item);
-		}catch(Exception e) {
+		} catch (Exception e) {
 			response.addError("Houve um erro ao persistir o item");
 			return ResponseEntity.badRequest().body(response);
 		}
-        
-        dto = mapper.toDto(item);
-        response.setData(dto);
-        return ResponseEntity.ok(response);
-    }
-    
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Response<String>> delete(@PathVariable Long id) {
-    	
-        Response<String> response = new Response<>();
-        Optional<Item> o = itemService.findById(id);
 
-        if (!o.isPresent()) {
-            response.addError("Erro ao remover, registro não encontrado para o id " + id);
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
-		
-		//Verifica se é o usuario que cadastrou que está deletando o item
-		if (o.get().getUsersrecord().getId() !=  user.get().getId()){
-            response.addError("O usuario não tem permissão para deletar o item");
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        try {
-        	 this.itemService.deleteById(id);
-        } catch (Exception e) {
-            response.addError("Houve um erro ao deletar o usuario.");
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        response.setData("Item cod. "+ o.get().getId()+" deletado com sucesso");
-        return ResponseEntity.ok(response);
-    }
-    
-    @PostMapping(value = "/{id}/devolucao")
-    public ResponseEntity<?> devolution(@PathVariable Long id) {
+		dto = mapper.toDto(item);
+		response.setData(dto);
+		return ResponseEntity.ok(response);
+	}
 
-        Response<ItemDTO> response = new Response<>();
-        
-        //Retorna item
-        Optional<Item> o = itemService.findById(id);
-        if (!o.isPresent()) {
-            response.addError("Item não encontrado");
-            return ResponseEntity.badRequest().body(response);
-        }
-        
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
-        
-        Item itemresult = o.get();
-        itemresult.setStatus('D');
-        itemresult.setUserfound(user.get());
-        
-        if(itemresult.getUserfound() == null){
-        	response.addError("Usuario 2 não selecionado");
-            return ResponseEntity.badRequest().body(response);
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<Response<String>> delete(@PathVariable Long id) {
+
+		Response<String> response = new Response<>();
+		Optional<Item> o = itemService.findById(id);
+
+		if (!o.isPresent()) {
+			response.addError("Erro ao remover, registro não encontrado para o id " + id);
+			return ResponseEntity.badRequest().body(response);
 		}
-        
-        try {
-        	itemresult = itemService.save(itemresult);
-		}catch(Exception e) {
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+
+		// Verifica se é o usuario que cadastrou que está deletando o item
+		if (o.get().getUsersrecord().getId() != user.get().getId()) {
+			response.addError("O usuario não tem permissão para deletar o item");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		try {
+			this.itemService.deleteById(id);
+		} catch (Exception e) {
+			response.addError("Houve um erro ao deletar o usuario.");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		response.setData("Item cod. " + o.get().getId() + " deletado com sucesso");
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping(value = "/{id}/devolucao")
+	public ResponseEntity<?> devolution(@PathVariable Long id) {
+
+		Response<ItemDTO> response = new Response<>();
+
+		// Retorna item
+		Optional<Item> o = itemService.findById(id);
+		if (!o.isPresent()) {
+			response.addError("Item não encontrado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+
+		Item itemresult = o.get();
+		itemresult.setStatus('D');
+		itemresult.setUserfound(user.get());
+
+		if (itemresult.getUserfound() == null) {
+			response.addError("Usuario 2 não selecionado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		try {
+			itemresult = itemService.save(itemresult);
+		} catch (Exception e) {
 			response.addError("Houve um erro ao efetuar a devolucao");
 			return ResponseEntity.badRequest().body(response);
 		}
-        
-        ItemDTO dto = mapper.toDto(itemresult);
-        response.setData(dto);
-        return ResponseEntity.ok(response);
-    }
+
+		ItemDTO dto = mapper.toDto(itemresult);
+		response.setData(dto);
+		return ResponseEntity.ok(response);
+	}
 }
