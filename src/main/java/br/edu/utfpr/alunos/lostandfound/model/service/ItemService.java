@@ -23,9 +23,13 @@ public class ItemService {
 	public Item save(Item item) {
 		return itemRepository.save(item);
 	} 
+		
+	public Page<Item> findAll(long id,Pageable pageable) {
+		return itemRepository.findItemNotMyUser(id, pageable);
+	}
 	
-	public Page<Item> findAll(Pageable pageable) {
-		return itemRepository.findAll(pageable);
+	public Page<Item> findAllMyItem(long id,Pageable pageable) {
+		return itemRepository.findMyUserItem(id, pageable);
 	}
 
 	public void deleteById(Long id) {

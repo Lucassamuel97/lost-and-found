@@ -47,8 +47,31 @@ public class ItemController {
 			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
 		Response<List<ItemDTO>> response = new Response<>();
+		
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		Page<Item> itens = this.itemService.findAll( user.get().getId() , pageable);
+		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
+		if (itemDTOS.getContent().isEmpty()) {
+			response.addError("Nenhum item nesta página.");
+			return ResponseEntity.badRequest().body(response);
+		}
+		response.setData(itemDTOS.getContent());
+		return ResponseEntity.ok(response);
+	}
+	
+	// retorna os items do usuario
+    @GetMapping(value = "/myitems")
+	public ResponseEntity<Response<List<ItemDTO>>> findAllMyItem(
+			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
-		Page<Item> itens = this.itemService.findAll(pageable);
+		Response<List<ItemDTO>> response = new Response<>();
+		
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		Page<Item> itens = this.itemService.findAllMyItem( user.get().getId() , pageable);
 		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
 		if (itemDTOS.getContent().isEmpty()) {
 			response.addError("Nenhum item nesta página.");
