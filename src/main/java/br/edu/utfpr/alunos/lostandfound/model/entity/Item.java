@@ -33,6 +33,9 @@ public class Item {
 
 	@Column
 	private String local;
+	
+	@Column
+	private String image;
 
 	@Column
 	private String horario;
@@ -66,6 +69,7 @@ public class Item {
 		this.local = dto.getLocal();
 		this.horario = dto.getHorario();
 		this.data = dto.getData();
+		this.image = dto.getImage();
     }
 	
 	

@@ -29,6 +29,8 @@ public class ItemDTO {
     
 	private char status;
 	
+	private String image;
+	
 	private UserDTO usersrecord;
 	private UserDTO userfound;
 	
@@ -44,6 +46,7 @@ public class ItemDTO {
     	this.horario = item.getHorario();
     	this.data = item.getData();
     	this.status = item.getStatus();
+    	this.image = item.getImage();
     	this.created = item.getCreated().toString();
     	this.updated = item.getUpdated().toString();
 	}

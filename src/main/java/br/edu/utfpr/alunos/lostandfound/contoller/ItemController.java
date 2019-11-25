@@ -146,8 +146,7 @@ public class ItemController {
 
 		Item item = mapper.toEntity(dto);
 
-		//item.setStatus('A');
-		
+		item.setStatus('A');
 		item.setUsersrecord(o.get());
 
 		try {
