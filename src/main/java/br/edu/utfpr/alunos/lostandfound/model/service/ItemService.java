@@ -28,8 +28,16 @@ public class ItemService {
 		return itemRepository.findItemNotMyUser(id, pageable);
 	}
 	
-	public Page<Item> findAllMyItem(long id,Pageable pageable) {
-		return itemRepository.findMyUserItem(id, pageable);
+	public Page<Item> findItemAtivos(long id,Pageable pageable) {
+		return itemRepository.findItemAtivos(id, pageable);
+	}
+	
+	public Page<Item> findItemPendentes(long id,Pageable pageable) {
+		return itemRepository.findItemPendentes(id, pageable);
+	}
+	
+	public Page<Item> findItemFinalizados(long id,Pageable pageable) {
+		return itemRepository.findItemFinalizados(id, pageable);
 	}
 
 	public void deleteById(Long id) {

@@ -61,9 +61,9 @@ public class ItemController {
 		return ResponseEntity.ok(response);
 	}
 	
-	// retorna os items do usuario
-    @GetMapping(value = "/myitems")
-	public ResponseEntity<Response<List<ItemDTO>>> findAllMyItem(
+	// retorna os items Ativos do usuario
+    @GetMapping(value = "/itemsativos")
+	public ResponseEntity<Response<List<ItemDTO>>> findItemsAtivos(
 			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
 		Response<List<ItemDTO>> response = new Response<>();
@@ -71,7 +71,47 @@ public class ItemController {
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
 		
-		Page<Item> itens = this.itemService.findAllMyItem( user.get().getId() , pageable);
+		Page<Item> itens = this.itemService.findItemAtivos( user.get().getId() , pageable);
+		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
+		if (itemDTOS.getContent().isEmpty()) {
+			response.addError("Nenhum item nesta página.");
+			return ResponseEntity.badRequest().body(response);
+		}
+		response.setData(itemDTOS.getContent());
+		return ResponseEntity.ok(response);
+	}
+    
+    // retorna os items Pendentes do usuario
+    @GetMapping(value = "/itemspendentes")
+	public ResponseEntity<Response<List<ItemDTO>>> findItemsPendentes(
+			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
+
+		Response<List<ItemDTO>> response = new Response<>();
+		
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		Page<Item> itens = this.itemService.findItemPendentes( user.get().getId() , pageable);
+		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
+		if (itemDTOS.getContent().isEmpty()) {
+			response.addError("Nenhum item nesta página.");
+			return ResponseEntity.badRequest().body(response);
+		}
+		response.setData(itemDTOS.getContent());
+		return ResponseEntity.ok(response);
+	}
+    
+    // retorna os items Finalizados do usuario
+    @GetMapping(value = "/itemsfinalizados")
+	public ResponseEntity<Response<List<ItemDTO>>> findItemsFinalizados(
+			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
+
+		Response<List<ItemDTO>> response = new Response<>();
+		
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+		
+		Page<Item> itens = this.itemService.findItemFinalizados( user.get().getId() , pageable);
 		Page<ItemDTO> itemDTOS = itens.map(i -> new ItemDTO(i));
 		if (itemDTOS.getContent().isEmpty()) {
 			response.addError("Nenhum item nesta página.");
@@ -106,7 +146,8 @@ public class ItemController {
 
 		Item item = mapper.toEntity(dto);
 
-		item.setStatus('A');
+		//item.setStatus('A');
+		
 		item.setUsersrecord(o.get());
 
 		try {
@@ -227,7 +268,79 @@ public class ItemController {
 		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
 
 		Item itemresult = o.get();
-		itemresult.setStatus('D');
+		itemresult.setStatus('F');
+		itemresult.setUserfound(user.get());
+
+		if (itemresult.getUserfound() == null) {
+			response.addError("Usuario 2 não selecionado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		try {
+			itemresult = itemService.save(itemresult);
+		} catch (Exception e) {
+			response.addError("Houve um erro ao efetuar a devolucao");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		ItemDTO dto = mapper.toDto(itemresult);
+		response.setData(dto);
+		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping(value = "/{id}/recuperacao")
+	public ResponseEntity<?> recovery(@PathVariable Long id) {
+
+		Response<ItemDTO> response = new Response<>();
+
+		// Retorna item
+		Optional<Item> o = itemService.findById(id);
+		if (!o.isPresent()) {
+			response.addError("Item não encontrado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+
+		Item itemresult = o.get();
+		itemresult.setStatus('P');
+		itemresult.setUserfound(user.get());
+
+		if (itemresult.getUserfound() == null) {
+			response.addError("Usuario 2 não selecionado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		try {
+			itemresult = itemService.save(itemresult);
+		} catch (Exception e) {
+			response.addError("Houve um erro ao efetuar a devolucao");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		ItemDTO dto = mapper.toDto(itemresult);
+		response.setData(dto);
+		return ResponseEntity.ok(response);
+	}
+	
+	@PostMapping(value = "/{id}/expirado")
+	public ResponseEntity<?> expired(@PathVariable Long id) {
+
+		Response<ItemDTO> response = new Response<>();
+
+		// Retorna item
+		Optional<Item> o = itemService.findById(id);
+		if (!o.isPresent()) {
+			response.addError("Item não encontrado");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+		Optional<User> user = userService.findByEmail(securityContext.getAuthentication().getName());
+
+		Item itemresult = o.get();
+		itemresult.setStatus('E');
 		itemresult.setUserfound(user.get());
 
 		if (itemresult.getUserfound() == null) {
