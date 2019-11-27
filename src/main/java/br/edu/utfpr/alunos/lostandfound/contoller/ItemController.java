@@ -62,7 +62,7 @@ public class ItemController {
 	}
 	
 	// retorna os items Ativos do usuario
-    @GetMapping(value = "/itemsativos")
+    @GetMapping(value = "/ativos")
 	public ResponseEntity<Response<List<ItemDTO>>> findItemsAtivos(
 			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
@@ -82,7 +82,7 @@ public class ItemController {
 	}
     
     // retorna os items Pendentes do usuario
-    @GetMapping(value = "/itemspendentes")
+    @GetMapping(value = "/pendentes")
 	public ResponseEntity<Response<List<ItemDTO>>> findItemsPendentes(
 			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
@@ -102,7 +102,7 @@ public class ItemController {
 	}
     
     // retorna os items Finalizados do usuario
-    @GetMapping(value = "/itemsfinalizados")
+    @GetMapping(value = "/finalizados")
 	public ResponseEntity<Response<List<ItemDTO>>> findItemsFinalizados(
 			@PageableDefault(page = 0, size = 5, sort = "updated", direction = Sort.Direction.ASC) Pageable pageable) {
 
