@@ -1,6 +1,7 @@
 package br.edu.utfpr.alunos.lostandfound.model.dto;
 
 
+import javax.persistence.Lob;
 import javax.validation.constraints.NotEmpty;
 
 import br.edu.utfpr.alunos.lostandfound.model.entity.Item;
@@ -27,6 +28,7 @@ public class ItemDTO {
     
 	private char status;
 	
+	@Lob
 	private String image;
 	
 	private UserDTO usersrecord;
