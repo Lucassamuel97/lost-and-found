@@ -1,7 +1,6 @@
 package br.edu.utfpr.alunos.lostandfound.model.dto;
 
 import br.edu.utfpr.alunos.lostandfound.model.entity.User;
-import br.edu.utfpr.alunos.lostandfound.security.ProfileEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;

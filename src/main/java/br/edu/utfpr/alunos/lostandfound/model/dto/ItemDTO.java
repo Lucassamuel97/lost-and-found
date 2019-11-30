@@ -1,13 +1,11 @@
 package br.edu.utfpr.alunos.lostandfound.model.dto;
 
-import java.util.Date;
 
 import javax.validation.constraints.NotEmpty;
 
 import br.edu.utfpr.alunos.lostandfound.model.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
