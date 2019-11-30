@@ -35,7 +35,6 @@ public class ItemDTO {
     private String created;
     private String updated;
 
-
     public ItemDTO(Item item) {
     	this.id = item.getId();
     	this.descricao = item.getDescricao();
