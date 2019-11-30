@@ -4,6 +4,8 @@ package br.edu.utfpr.alunos.lostandfound.model.dto;
 import javax.persistence.Lob;
 import javax.validation.constraints.NotEmpty;
 
+import org.w3c.dom.Text;
+
 import br.edu.utfpr.alunos.lostandfound.model.entity.Item;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -36,7 +36,7 @@ public class Item {
 	private String local;
 	
 	@Lob
-	@Column
+	@Column(name="image", columnDefinition="TEXT")
 	private String image;
 
 	@Column
