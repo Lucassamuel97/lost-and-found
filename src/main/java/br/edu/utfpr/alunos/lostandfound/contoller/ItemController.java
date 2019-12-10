@@ -358,4 +358,31 @@ public class ItemController {
 		response.setData(dto);
 		return ResponseEntity.ok(response);
 	}
+	
+	@PostMapping(value = "/{id}/retorna")
+	public ResponseEntity<?> returnActive(@PathVariable Long id) {
+
+		Response<ItemDTO> response = new Response<>();
+
+		// Retorna item
+		Optional<Item> o = itemService.findById(id);
+		if (!o.isPresent()) {
+			response.addError("Item não encontrado");
+			return ResponseEntity.badRequest().body(response);
+		}
+		
+		Item itemresult = o.get();
+		itemresult.setStatus('A');
+
+		try {
+			itemresult = itemService.save(itemresult);
+		} catch (Exception e) {
+			response.addError("Houve um erro ao efetuar a reativação do item");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		ItemDTO dto = mapper.toDto(itemresult);
+		response.setData(dto);
+		return ResponseEntity.ok(response);
+	}
 }
